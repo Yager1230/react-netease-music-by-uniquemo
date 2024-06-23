@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, InputGroup, Button, IDialogProps } from '@blueprintjs/core'
+import { Dialog, InputGroup, Button, IDialogProps, Intent } from '@blueprintjs/core'
 
 import authApis from 'apis/auth'
 import useAsyncFn from 'hooks/useAsyncFn'
@@ -20,7 +20,17 @@ const LoginDialog: React.FC<IProps> = ({ isOpen, onClose = noop }) => {
   const [loginState, loginFn] = useAsyncFn(authApis.login)
   const { loading, error } = loginState
 
+  const [phoneIntent, setPhoneIntent] = useState<Intent>('primary')
+  const [passWordIntent, setpassWordIntent] = useState<Intent>('primary')
+
   const handleLogin = async () => {
+    // 原函数没有判断输入为空，显然不合理
+    setPhoneIntent((_) => (phone ? 'primary' : 'danger'))
+    setpassWordIntent((_) => (password ? 'primary' : 'danger'))
+    if (!(phone && password)) {
+      return
+    }
+
     const result = await loginFn({ phone, password })
     if (result) {
       dispatch({
@@ -43,6 +53,7 @@ const LoginDialog: React.FC<IProps> = ({ isOpen, onClose = noop }) => {
           placeholder='请输入手机号'
           leftIcon='mobile-phone'
           value={phone}
+          intent={phoneIntent}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             setPhone(event.target.value)
           }}
@@ -51,6 +62,7 @@ const LoginDialog: React.FC<IProps> = ({ isOpen, onClose = noop }) => {
           placeholder='请输入密码'
           leftIcon='lock'
           type='password'
+          intent={passWordIntent}
           value={password}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             setPassword(event.target.value)
